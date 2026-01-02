@@ -54,6 +54,14 @@ const buildHtmlTemplate = (data) => `
 `;
 
 /* -------------------- API Route -------------------- */
+// test route
+app.get('/test',async(req,res) => {
+return res.json({
+  success:true,
+  message:`Test is successfull.`
+})
+})
+
 app.post("/send-email", async (req, res) => {
   try {
     const {
