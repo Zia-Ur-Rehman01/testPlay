@@ -12,8 +12,8 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: '*',
-    methods: ["GET","POST"],
+    origin: "*",
+    methods: ["GET", "POST"],
   })
 );
 
@@ -24,7 +24,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS, 
+    pass: process.env.SMTP_PASS,
   },
 });
 
@@ -37,7 +37,13 @@ const buildHtmlTemplate = (data) => `
       <p><strong>Name:</strong> ${data.name}</p>
       <p><strong>Email:</strong> ${data.email}</p>
       <p><strong>Phone:</strong> ${data.phone}</p>
-      ${ whatsapp && <p><strong>WhatsApp:</strong> ${data.whatsapp}</p>}
+
+      ${
+        data.whatsapp
+          ? `<p><strong>WhatsApp:</strong> ${data.whatsapp}</p>`
+          : ""
+      }
+
       <p><strong>Nationality:</strong> ${data.nationality}</p>
       <p><strong>Service:</strong> ${data.service}</p>
       <p>
@@ -53,15 +59,17 @@ const buildHtmlTemplate = (data) => `
   </div>
 `;
 
-/* -------------------- API Route -------------------- */
-// test route
-app.get('/test',async(req,res) => {
-return res.json({
-  success:true,
-  message:`Test is successfull.`
-})
-})
+/* -------------------- API Routes -------------------- */
 
+// Test route
+app.get("/test", async (req, res) => {
+  return res.json({
+    success: true,
+    message: "Test is successful.",
+  });
+});
+
+// Send email
 app.post("/send-email", async (req, res) => {
   try {
     const {
@@ -74,7 +82,7 @@ app.post("/send-email", async (req, res) => {
       best_time_to_call,
     } = req.body;
 
-    // Basic validation (backend safety)
+    // Required fields (WhatsApp optional)
     if (
       !name ||
       !email ||
@@ -97,7 +105,7 @@ app.post("/send-email", async (req, res) => {
         name,
         email,
         phone,
-        whatsapp,
+        whatsapp: whatsapp?.trim() || null,
         nationality,
         service,
         best_time_to_call,
