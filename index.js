@@ -37,7 +37,7 @@ const buildHtmlTemplate = (data) => `
       <p><strong>Name:</strong> ${data.name}</p>
       <p><strong>Email:</strong> ${data.email}</p>
       <p><strong>Phone:</strong> ${data.phone}</p>
-      <p><strong>WhatsApp:</strong> ${data.whatsapp}</p>
+      ${ whatsapp && <p><strong>WhatsApp:</strong> ${data.whatsapp}</p>}
       <p><strong>Nationality:</strong> ${data.nationality}</p>
       <p><strong>Service:</strong> ${data.service}</p>
       <p>
@@ -79,7 +79,6 @@ app.post("/send-email", async (req, res) => {
       !name ||
       !email ||
       !phone ||
-      !whatsapp ||
       !nationality ||
       !service ||
       !best_time_to_call
