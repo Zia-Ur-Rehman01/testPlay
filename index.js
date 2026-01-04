@@ -10,12 +10,33 @@ const app = express();
 /* -------------------- Middlewares -------------------- */
 app.use(express.json());
 
+const allowedOrigins = [
+  "http://localhost:8080",
+  "http://127.0.0.1:8080",
+  "https://schenigotravel.co.uk",
+  "https://www.schenigotravel.co.uk",
+  "https://dev.schenigotravel.co.uk",
+];
+
 app.use(
   cors({
-    origin: "*",
-    methods: ["POST"],
+    origin: (origin, callback) => {
+      // allow server-to-server & tools like curl
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Handle preflight explicitly (IMPORTANT on VPS)
+app.options("*", cors());
 
 /* -------------------- SMTP Transporter -------------------- */
 const transporter = nodemailer.createTransport({
@@ -24,7 +45,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS, 
+    pass: process.env.SMTP_PASS,
   },
 });
 
@@ -53,14 +74,13 @@ const buildHtmlTemplate = (data) => `
   </div>
 `;
 
-/* -------------------- API Route -------------------- */
-// test route
-app.get('/test',async(req,res) => {
-return res.json({
-  success:true,
-  message:`Test is successfull.`
-})
-})
+/* -------------------- API Routes -------------------- */
+app.get("/test", async (req, res) => {
+  return res.json({
+    success: true,
+    message: "Test is successful.",
+  });
+});
 
 app.post("/send-email", async (req, res) => {
   try {
@@ -74,7 +94,6 @@ app.post("/send-email", async (req, res) => {
       best_time_to_call,
     } = req.body;
 
-    // Basic validation (backend safety)
     if (
       !name ||
       !email ||
